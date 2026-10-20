@@ -1,156 +1,156 @@
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-function playSynthesizedSound(type) {
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
+function playSound(soundKind) {
+  if (audioContext.state === 'suspended') {
+    audioContext.resume();
   }
 
-  const now = audioCtx.currentTime;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
+  const currentTime = audioContext.currentTime;
+  const oscillator = audioContext.createOscillator();
+  const volumeNode = audioContext.createGain();
 
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
+  oscillator.connect(volumeNode);
+  volumeNode.connect(audioContext.destination);
 
-  if (type === 'horn') {
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(420, now);
-    osc.frequency.setValueAtTime(470, now + 0.08);
-    gain.gain.setValueAtTime(0.3, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-    osc.start(now);
-    osc.stop(now + 0.35);
+  if (soundKind === 'horn') {
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(420, currentTime);
+    oscillator.frequency.setValueAtTime(470, currentTime + 0.08);
+    volumeNode.gain.setValueAtTime(0.3, currentTime);
+    volumeNode.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.35);
+    oscillator.start(currentTime);
+    oscillator.stop(currentTime + 0.35);
 
-  } else if (type === 'bass') {
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(150, now);
-    osc.frequency.exponentialRampToValueAtTime(40, now + 0.45);
-    gain.gain.setValueAtTime(0.5, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
-    osc.start(now);
-    osc.stop(now + 0.45);
+  } else if (soundKind === 'bass') {
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(150, currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(40, currentTime + 0.45);
+    volumeNode.gain.setValueAtTime(0.5, currentTime);
+    volumeNode.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.45);
+    oscillator.start(currentTime);
+    oscillator.stop(currentTime + 0.45);
 
-  } else if (type === 'laser') {
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(990, now);
-    osc.frequency.exponentialRampToValueAtTime(100, now + 0.2);
-    gain.gain.setValueAtTime(0.25, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-    osc.start(now);
-    osc.stop(now + 0.2);
+  } else if (soundKind === 'laser') {
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(990, currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(100, currentTime + 0.2);
+    volumeNode.gain.setValueAtTime(0.25, currentTime);
+    volumeNode.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.2);
+    oscillator.start(currentTime);
+    oscillator.stop(currentTime + 0.2);
 
   } else {
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(520, now);
-    gain.gain.setValueAtTime(0.3, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-    osc.start(now);
-    osc.stop(now + 0.25);
+    oscillator.type = 'triangle';
+    oscillator.frequency.setValueAtTime(520, currentTime);
+    volumeNode.gain.setValueAtTime(0.3, currentTime);
+    volumeNode.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.25);
+    oscillator.start(currentTime);
+    oscillator.stop(currentTime + 0.25);
   }
 }
 
-const soundBoard = {
+const padsData = {
   "q": { title: "Airhorn", soundType: "horn", count: 0 },
   "w": { title: "808 Bass", soundType: "bass", count: 0 },
   "e": { title: "Laser Shot", soundType: "laser", count: 0 },
   "r": { title: "Synth Beep", soundType: "beep", count: 0 }
 };
 
-const padsContainer = document.getElementById("pads");
-const nowPlaying = document.getElementById("nowPlaying");
+const padsBox = document.getElementById("pads");
+const statusLabel = document.getElementById("nowPlaying");
 
-function renderBoard() {
-    padsContainer.innerHTML = "";
+function drawPads() {
+    padsBox.innerHTML = "";
 
-    for (let key in soundBoard) {
-        const sample = soundBoard[key];
-        const btn = document.createElement("button");
+    for (let padKey in padsData) {
+        const padItem = padsData[padKey];
+        const padButton = document.createElement("button");
 
-        btn.className = "pad-btn";
-        btn.id = `pad-${key}`;
+        padButton.className = "pad-btn";
+        padButton.id = `pad-${padKey}`;
 
-        btn.innerHTML = `
-            <div class="key">${key}</div>
-            <div class="name">${sample.title}</div>
+        padButton.innerHTML = `
+            <div class="key">${padKey}</div>
+            <div class="name">${padItem.title}</div>
             <div class="count">
-                Натиснуто: <strong>${sample.count}</strong>
+                Натиснуто: <strong>${padItem.count}</strong>
             </div>
         `;
 
-        btn.onclick = () => {
-            triggerKey(key);
+        padButton.onclick = () => {
+            pressPad(padKey);
         };
 
-        padsContainer.appendChild(btn);
+        padsBox.appendChild(padButton);
     }
 }
 
-renderBoard();
+drawPads();
 
-function triggerKey(key) {
-    key = key.toLowerCase();
+function pressPad(pressedKey) {
+    pressedKey = pressedKey.toLowerCase();
 
-    if (soundBoard[key]) {
-        let item = soundBoard[key];
-        playSynthesizedSound(item.soundType);
+    if (padsData[pressedKey]) {
+        let selectedPad = padsData[pressedKey];
+        playSound(selectedPad.soundType);
 
-        item.count++;
+        selectedPad.count++;
 
-        nowPlaying.innerHTML = `Now Playing: ${item.title}`;
+        statusLabel.innerHTML = `Now Playing: ${selectedPad.title}`;
     }
 
-    renderBoard();
+    drawPads();
 
-    const padEl = document.getElementById(`pad-${key}`);
+    const padElement = document.getElementById(`pad-${pressedKey}`);
 
-    if (padEl) {
-        padEl.classList.add("active");
-        setTimeout(() => padEl.classList.remove("active"), 150);
+    if (padElement) {
+        padElement.classList.add("active");
+        setTimeout(() => padElement.classList.remove("active"), 150);
     }
 }
 
 function deleteSample() {
-  const input = document.getElementById("deleteKeyInput");
-  const key = input.value.trim().toLowerCase();
+  const deleteField = document.getElementById("deleteKeyInput");
+  const keyToDelete = deleteField.value.trim().toLowerCase();
 
-  if (!key) {
+  if (!keyToDelete) {
     alert("Будь ласка, введіть клавішу для видалення!");
     return;
   }
 
-  if (key in soundBoard) {
-    delete soundBoard[key];
-    renderBoard();
-    input.value = "";
+  if (keyToDelete in padsData) {
+    delete padsData[keyToDelete];
+    drawPads();
+    deleteField.value = "";
   } 
   
   else {
-    alert(`Клавішу "${key}" не знайдено в пульті!`);
+    alert(`Клавішу "${keyToDelete}" не знайдено в пульті!`);
   }
 }
 
-window.addEventListener("keydown", (event) => {
-    if(event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT'){
+window.addEventListener("keydown", (keyEvent) => {
+    if(keyEvent.target.tagName === 'INPUT' || keyEvent.target.tagName === 'SELECT'){
         return;
     }
 
-    triggerKey(event.key);
+    pressPad(keyEvent.key);
 })
 
 document.getElementById("addBtn").onclick = function() {
-    const key = document.getElementById("inputKey");
-    const name = document.getElementById("inputName");
-    const type = document.getElementById("inputType");
+    const keyField = document.getElementById("inputKey");
+    const nameField = document.getElementById("inputName");
+    const typeField = document.getElementById("inputType");
 
-    const keyValue = key.value.trim().toLowerCase();
-    const nameValue = name.value.trim();
-    const typeValue = type.value.trim();
+    const keyText = keyField.value.trim().toLowerCase();
+    const nameText = nameField.value.trim();
+    const typeText = typeField.value.trim();
 
-    if(keyValue !== '' && nameValue !== '') {
-        soundBoard[keyValue] = { title: nameValue, soundType: typeValue, count: 0 };
-        key.value = '';
-        name.value = '';
-        renderBoard();
+    if(keyText !== '' && nameText !== '') {
+        padsData[keyText] = { title: nameText, soundType: typeText, count: 0 };
+        keyField.value = '';
+        nameField.value = '';
+        drawPads();
     }
     else {
         alert("Заповніть всі поля!");
