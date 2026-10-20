@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>DJ Launchpad — Працюючий звук</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <h1>🎛 Інтерактивний DJ Launchpad</h1>
+  <p class="hint">Клікайте мишкою або тисніть клавіші на клавіатурі (англійська розкладка)</p>
+
+  <div class="screen">
+    Зараз грає: <strong id="nowPlaying">Очікування дії...</strong>
+  </div>
+
+  <input type="text" id="deleteKeyInput" placeholder="Введіть клавішу для видалення" style="width: 200px; text-transform: uppercase;">
+
+<button onclick="deleteSample()">Видалити</button>
+
+  <div class="pads-container" id="pads"></div>
+
+  <div class="add-form">
+    <input type="text" id="inputKey" maxlength="1" placeholder="Клавіша (напр. T)" style="width: 140px; text-transform: uppercase;">
+    <input type="text" id="inputName" placeholder="Назва звуку..." style="width: 160px;">
+    
+    <select id="inputType">
+      <option value="horn">Ріжок (Horn)</option>
+      <option value="bass">Бас (Bass Drop)</option>
+      <option value="laser">Лазер (Laser)</option>
+      <option value="beep">Біп (Синт)</option>
+    </select>
+
+    <button id="addBtn">Додати клавішу</button>
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
